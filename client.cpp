@@ -29,26 +29,24 @@ int main(int argc, char* argv[]) {
     std::string msg_str = "";
     int timeout_sec = -1;
 
-    // 1. Rygorystyczne parsowanie argumentów z użyciem getopt
-    int opt;
-    while ((opt = getopt(argc, argv, "a:p:m:t:")) != -1) {
-        switch (opt) {
-            case 'a': address = optarg; break;
-            case 'p': port = std::stoi(optarg); break;
-            case 'm': msg_str = optarg; break;
-            case 't': timeout_sec = std::stoi(optarg); break;
-            default:
-                std::cerr << "Nieprawidlowy parametr." << std::endl;
-                return 1;
-        }
-    }
-
-    if (address.empty() || port <= 0 || port > 65535 || msg_str.empty() || timeout_sec <= 0 || timeout_sec > 99) {
-        std::cerr << "Blad: Brakujace lub nieprawidlowe parametry." << std::endl;
-        return 1;
-    }
-
     try {
+        // 1. Rygorystyczne parsowanie przeniesione do srodka bloku TRY
+        int opt;
+        while ((opt = getopt(argc, argv, "a:p:m:t:")) != -1) {
+            switch (opt) {
+                case 'a': address = optarg; break;
+                case 'p': port = std::stoi(optarg); break;
+                case 'm': msg_str = optarg; break;
+                case 't': timeout_sec = std::stoi(optarg); break;
+                default:
+                    throw std::runtime_error("Nieprawidlowy parametr linii polecen.");
+            }
+        }
+
+        if (address.empty() || port <= 0 || port > 65535 || msg_str.empty() || timeout_sec <= 0 || timeout_sec > 99) {
+            throw std::runtime_error("Brakujace lub nieprawidlowe parametry.");
+        }
+
         // 2. Budowanie pakietu binarnego
         std::vector<uint32_t> msg_args = parse_message_args(msg_str);
         if (msg_args.empty()) throw std::runtime_error("Pusty komunikat");
